@@ -1,26 +1,131 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg-1: #0b0b1f;
+  --bg-2: #1a1040;
+  --fg: #eef0ff;
+  --x: #ff4fa3;
+  --o: #36e2ff;
+  --panel: rgba(255, 255, 255, 0.06);
+  --panel-border: rgba(255, 255, 255, 0.12);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+html { background: var(--bg-1); }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  min-height: 100dvh;
+  color: var(--fg);
+  background: radial-gradient(1200px 700px at 20% -10%, #3b1d7a 0%, transparent 60%),
+    radial-gradient(900px 600px at 110% 110%, #0e4b6b 0%, transparent 55%),
+    linear-gradient(160deg, var(--bg-1), var(--bg-2));
+  background-attachment: fixed;
+  font-family: ui-rounded, "SF Pro Rounded", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+/* twinkling starfield */
+.stars {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  background-image: radial-gradient(1.5px 1.5px at 10% 20%, #fff8 50%, transparent 51%),
+    radial-gradient(1px 1px at 30% 80%, #fff6 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 70% 30%, #fff7 50%, transparent 51%),
+    radial-gradient(1px 1px at 85% 65%, #fff5 50%, transparent 51%),
+    radial-gradient(1px 1px at 50% 50%, #fff6 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 92% 12%, #fff8 50%, transparent 51%),
+    radial-gradient(1px 1px at 18% 55%, #fff5 50%, transparent 51%);
+  background-size: 400px 400px;
+  animation: twinkle 6s ease-in-out infinite alternate;
+}
+@keyframes twinkle {
+  from { opacity: 0.5; }
+  to { opacity: 1; }
+}
+
+.title {
+  background: linear-gradient(90deg, var(--x), #b78bff, var(--o));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 4px 24px rgba(183, 139, 255, 0.35));
+}
+
+/* marks */
+.mark {
+  fill: none;
+  stroke-width: 12;
+  stroke-linecap: round;
+  overflow: visible;
+}
+.mark-x { stroke: var(--x); filter: drop-shadow(0 0 6px var(--x)); }
+.mark-o { stroke: var(--o); filter: drop-shadow(0 0 6px var(--o)); }
+.cell .mark:not(.ghost) path,
+.cell .mark:not(.ghost) circle {
+  stroke-dasharray: 200;
+  stroke-dashoffset: 200;
+  animation: draw 0.35s ease-out forwards;
+}
+.cell .mark:not(.ghost) path:nth-child(2) { animation-delay: 0.15s; }
+@keyframes draw { to { stroke-dashoffset: 0; } }
+
+/* board */
+.board {
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(8px);
+}
+.cell {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: transform 0.12s ease, background 0.2s ease, opacity 0.3s ease;
+}
+.cell:not(:disabled):hover { background: rgba(255, 255, 255, 0.1); transform: translateY(-2px); cursor: pointer; }
+.cell:focus-visible { outline: 3px solid #b78bff; outline-offset: 2px; }
+.cell-win {
+  background: rgba(255, 220, 120, 0.16);
+  border-color: rgba(255, 220, 120, 0.6);
+  animation: pulse 1s ease-in-out infinite alternate;
+}
+@keyframes pulse {
+  from { box-shadow: 0 0 0 rgba(255, 220, 120, 0); }
+  to { box-shadow: 0 0 28px rgba(255, 220, 120, 0.55); }
+}
+
+/* scoreboard */
+.score-card {
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.score-x.score-active { border-color: var(--x); box-shadow: 0 0 18px rgba(255, 79, 163, 0.35); }
+.score-o.score-active { border-color: var(--o); box-shadow: 0 0 18px rgba(54, 226, 255, 0.35); }
+
+.banner { animation: pop 0.4s cubic-bezier(0.2, 1.6, 0.4, 1); }
+@keyframes pop {
+  from { transform: scale(0.6); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+/* buttons */
+.btn-primary {
+  color: #120a2a;
+  background: linear-gradient(90deg, var(--x), #b78bff, var(--o));
+  box-shadow: 0 8px 24px rgba(183, 139, 255, 0.35);
+  transition: transform 0.12s ease, filter 0.2s ease;
+}
+.btn-primary:hover { transform: translateY(-1px); filter: brightness(1.08); }
+.btn-primary:active { transform: translateY(1px); }
+.btn-ghost {
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  transition: background 0.2s ease;
+}
+.btn-ghost:hover { background: rgba(255, 255, 255, 0.12); }
+.btn-primary:focus-visible, .btn-ghost:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+  .cell .mark path, .cell .mark circle { stroke-dashoffset: 0 !important; }
 }
